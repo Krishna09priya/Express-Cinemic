@@ -70,7 +70,7 @@ router.post('/login', (req, res) => {
         return bcrypt.compare(password, user.password)
           .then(isMatch => {
             if (!isMatch) {
-              return res.status(400).json(commonResponse(false,null,'Password is incorrect'));
+              return res.status(400).json(commonResponse(false,null,'Email id or password is incorrect'));
             }
 
             const secret = process.env.JWT_SECRET || defaultSecretKey;
@@ -85,7 +85,7 @@ router.post('/login', (req, res) => {
               isBlocked:false
             }
 
-            return res.status(200).json(commonResponse(true,serializedData,'Successfully Logged In'));
+            return res.status(200).json(commonResponse(true, serializedData,'Successfully Logged In'));
           });
       })
       .catch(error => {
@@ -100,7 +100,7 @@ router.post('/login', (req, res) => {
       const user = await User.findOne({ email });
   
       if (!user) {
-        return res.status(404).json({ message: 'This email id is not registered' });
+        return res.status(400).json(commonResponse(false,null,'This email id is not registered'));
       }
   
       const resetToken = crypto.randomBytes(20).toString('hex');
@@ -122,14 +122,14 @@ router.post('/login', (req, res) => {
         subject: 'Password Reset',
         text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
           Please click on the following link, or paste this into your browser to complete the process:\n\n
-          http://localhost:3000/reset-password/${resetToken}\n\n
+          http://localhost:3001/reset-password/${resetToken}\n\n
           If you did not request this, please ignore this email and your password will remain unchanged.\n`
       };
   
       await transporter.sendMail(mailOptions);
-      return res.status(200).json({ message: 'Reset link sent to your email' });
+      return res.status(200).json(commonResponse(true,null,'Reset link sent to your email'));
     } catch (error) {
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json(commonResponse(false,null,'Internal server error'));
     }
   });
   
@@ -144,7 +144,7 @@ router.post('/login', (req, res) => {
       });
   
       if (!user) {
-        return res.status(400).json({ message: 'Link expired' });
+        return res.status(400).json(commonResponse(false,null,'Link expired'));
       }
   
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -153,9 +153,9 @@ router.post('/login', (req, res) => {
       user.tokenExpirationTime = null;
   
       await user.save();
-      return res.status(200).json({ message: 'Password reset successfully' });
+      return res.status(200).json(commonResponse(true, null,'Password reset successfully'));
     } catch (error) {
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json(commonResponse(false, null, 'Internal server error'));
     }
   });
 
