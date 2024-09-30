@@ -82,7 +82,6 @@ router.post('/login', (req, res) => {
             );
             const serializedData ={
               token:token,
-              isBlocked:false
             }
 
             return res.status(200).json(commonResponse(true, serializedData,'Successfully Logged In'));
@@ -164,19 +163,19 @@ const authenticate = async (req, res, next) => {
   try {
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json(commonResponse(false,null,'Unauthorized'));
     }
 
     const token = authorizationHeader.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json(commonResponse(false,null,'Unauthorized'));
     }
 
     const secret = process.env.JWT_SECRET || defaultSecretKey;
 
     const decoded = jwt.verify(token, secret, (err, decoded) => {
       if (err) {
-        return res.status(401).json({ message: 'Invalid token' });
+        return res.status(401).json(commonResponse(false,null,'Invalid token'));
       }
       return decoded;
     });
@@ -184,13 +183,13 @@ const authenticate = async (req, res, next) => {
     const user = await User.findById(decoded.userId);
 
     if (!user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json(commonResponse(false,null,'Unauthorized'));
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 };
 
@@ -200,7 +199,6 @@ router.get('/movies', authenticate, async (req, res) => {
   const limitNumber = parseInt(limit, 10);
 
   try {
-    const { isSubscribed } = req.user;
 
     const searchQuery = search
       ? {
@@ -238,14 +236,13 @@ router.get('/movies', authenticate, async (req, res) => {
 
     return res.status(200).json({
       success:true,
-      isSubscribed,
       movies,
       totalMovies,
       currentPage: pageNumber,
       totalPages: Math.ceil(totalMovies / limitNumber)
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -257,17 +254,17 @@ router.post('/watch-later', authenticate, async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user?.watch_later.some(entry => entry.movie_id.toString() === movie_id)) {
-      return res.status(400).json({ message: 'Movie is already in Watch Later list',success:false });
+      return res.status(400).json(commonResponse(false,null,'Movie is already in Watch Later list'));
     }
     else{
     user.watch_later.push({ movie_id });
     await user.save();
 
-    return res.status(200).json({ message: 'Movie successfully added to Watch Later',success:true });
+    return res.status(200).json(commonResponse(true,null,'Movie successfully added to Watch Later'));
     }
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -276,6 +273,10 @@ router.get('/movie-detail-page/:movie_id', authenticate, async (req, res) => {
   const movie_id = req.params.movie_id; 
 
   try {
+    const { isSubscribed } = req.user;
+    if(!isSubscribed){
+      return res.status(400).json(commonResponse(false,null,'Please subscribe a plan'))
+   }
     const movie = await Movie.findById(movie_id);
     if (movie && movie!=null) {
       const serializedData = {
@@ -301,7 +302,7 @@ router.post('/watch-history', authenticate, async (req, res) => {
     const movie = await Movie.findById(movie_id);
     
     if (!user || !movie) {
-      return res.status(404).json({ message: 'User or Movie not found' });
+      return res.status(404).json(commonResponse(false,null,'User or Movie not found'));
     }
 
     const userWatchHistoryUpdate = await User.updateOne(
@@ -316,13 +317,13 @@ router.post('/watch-history', authenticate, async (req, res) => {
 
     // Check if updates were made
     if (userWatchHistoryUpdate.modifiedCount === 0 && movieWatchHistoryUpdate.modifiedCount === 0) {
-      return res.status(400).json({ message: 'Movie is already in Watch history' });
+      return res.status(400).json(commonResponse(false,null, 'Movie is already in Watch history'));
     }
 
-    return res.status(200).json({ message: 'Movie successfully added to Watch history' });
+    return res.status(200).json(commonResponse(true,null,'Movie successfully added to Watch history'));
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -336,17 +337,17 @@ router.post('/rating', authenticate, async (req, res) => {
     const movie = await Movie.findById(movie_id);
 
     if (movie?.rating.some(entry => entry.user_id.toString() === user_id.toString())) {
-      return res.status(400).json({ message: 'You already rated the movie' });
+      return res.status(400).json(commonResponse(false,null,'You already rated the movie'));
     }
     else{
       movie.rating.push({ user_id,rating });
       await movie.save();
 
-    return res.status(200).json({ message: 'Your rating successfully added' });
+    return res.status(200).json(commonResponse(true,null,'Your rating successfully added'));
     }
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
