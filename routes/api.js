@@ -288,7 +288,7 @@ router.get('/movie-detail-page/:movie_id', authenticate, async (req, res) => {
       return res.status(200).json(commonResponse(true, serializedData, 'Successfully found the movie.'));
     }
   } catch (error) {
-    return res.status(200).json(commonResponse(true, null, 'Movie not found'));
+    return res.status(400).json(commonResponse(true, null, 'Movie not found'));
   }
 });
 
@@ -317,7 +317,7 @@ router.post('/watch-history', authenticate, async (req, res) => {
 
     // Check if updates were made
     if (userWatchHistoryUpdate.modifiedCount === 0 && movieWatchHistoryUpdate.modifiedCount === 0) {
-      return res.status(400).json(commonResponse(false,null, 'Movie is already in Watch history'));
+      return res.status(200).json(commonResponse(true,null, 'Movie is already in Watch history'));
     }
 
     return res.status(200).json(commonResponse(true,null,'Movie successfully added to Watch history'));
