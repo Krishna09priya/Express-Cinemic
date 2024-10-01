@@ -353,7 +353,7 @@ router.post('/rating', authenticate, async (req, res) => {
 
 router.get('/plans', authenticate, async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query; 
+    const { page = 1, limit = 2 } = req.query; 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
@@ -372,17 +372,18 @@ router.get('/plans', authenticate, async (req, res) => {
       }));
 
       return res.status(200).json({
+        success:true,
         data: serializedData,
         totalSubscriptions, 
         currentPage: pageNumber, 
         totalPages: Math.ceil(totalSubscriptions / limitNumber) 
       });
     } else {
-      return res.status(404).json({ message: 'No plans found' });
+      return res.status(404).json(commonResponse(false,null,'No plans found'));
     }
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -393,19 +394,19 @@ router.get('/plan-detail-page/:plan_id', authenticate, async (req, res) => {
 
       const subscription = await Subscription.findById(plan_id);
       
-      if (subscription) {
+      if (subscription && subscription!=null) {
         const serializedData = {
         plan: subscription.plan,
         detailedDescription: subscription.description,
         duration: subscription.duration,
         price: subscription.price
         };
-        return res.status(200).json({ data: serializedData });
+        return res.status(200).json(commonResponse(true,serializedData,'Successfully found the plan.'));
       } else {
-        return res.status(404).json({ message: 'Plan not found' });
+        return res.status(400).json(commonResponse(false,null,'Plan not found'));
       }
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -420,7 +421,7 @@ router.get('/subscription-status', authenticate, async (req, res) => {
     });
 
     if (subscriptions.length === 0) {
-      return res.status(400).json({ message: "You haven't purchased any plans yet." });
+      return res.status(200).json(commonResponse(true,null,"You haven't purchased any plans yet."));
     }
 
     const userSubscriptions = subscriptions.flatMap(subscription => 
@@ -462,13 +463,10 @@ router.get('/subscription-status', authenticate, async (req, res) => {
       };
     });
 
-    return res.status(200).json({
-      currentPlans: serializedCurrent,
-      previousPlans: serializedPrevious,
-    });
+    return res.status(200).json(commonResponse(true,{currentPlans: serializedCurrent,previousPlans: serializedPrevious,},'Successfully found the plans.'));
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -483,7 +481,7 @@ router.put('/change-password', authenticate, async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect' });
+      return res.status(400).json(commonResponse(false,null,'Current password is incorrect'));
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
@@ -491,9 +489,9 @@ router.put('/change-password', authenticate, async (req, res) => {
     user.password = hashedNewPassword;
     await user.save();
 
-    return res.status(200).json({ message: 'Password successfully changed' });
+    return res.status(200).json(commonResponse(true,null,'Password successfully changed'));
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -505,7 +503,7 @@ router.get('/watch-later', authenticate, async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json(commonResponse(false,null,'User not found'));
     }
 
     const { page = 1, limit = 10 } = req.query; 
@@ -534,13 +532,14 @@ router.get('/watch-later', authenticate, async (req, res) => {
     });
 
     return res.status(200).json({
+      success:true,
       watchLaterMovies,
       currentPage: pageNumber,
       totalPages: Math.ceil(totalMovies / limitNumber), 
       totalMovies
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -555,7 +554,7 @@ router.get('/watch-history', authenticate, async (req, res) => {
     const user = await User.findById(userId);
     
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json(commonResponse(false,null,'User not found'));
     }
 
     const watchHistoryEntries = user.watch_history;
@@ -578,13 +577,14 @@ router.get('/watch-history', authenticate, async (req, res) => {
     });
 
     return res.status(200).json({
-      data,
+      success:true,
+      data:data,
       currentPage: pageNumber,
       totalPages: Math.ceil(totalMovies / limitNumber), 
       totalMovies
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
@@ -596,7 +596,7 @@ router.delete('/watch-history/:movieId', authenticate, async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json(commonResponse(false,null,'User not found'));
     }
 
     user.watch_history = user.watch_history.filter(entry => 
@@ -605,9 +605,9 @@ router.delete('/watch-history/:movieId', authenticate, async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({ message: 'Movie removed from watch history successfully' });
+    return res.status(200).json(commonResponse(true,null,'Movie removed from watch history successfully'));
   } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
 });
 
