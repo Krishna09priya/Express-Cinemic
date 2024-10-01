@@ -365,6 +365,7 @@ router.get('/plans', authenticate, async (req, res) => {
 
     if (subscriptions.length > 0) {
       const serializedData = subscriptions.map(subscription => ({
+        _id:subscription._id,
         plan: subscription.plan,
         description: subscription.description,
         duration: subscription.duration,
@@ -397,7 +398,7 @@ router.get('/plan-detail-page/:plan_id', authenticate, async (req, res) => {
       if (subscription && subscription!=null) {
         const serializedData = {
         plan: subscription.plan,
-        detailedDescription: subscription.description,
+        detailedDescription: subscription.detailedDescription,
         duration: subscription.duration,
         price: subscription.price
         };
@@ -439,6 +440,7 @@ router.get('/subscription-status', authenticate, async (req, res) => {
       );
 
       return {
+        _id:subscriptionDetails._id,
         plan: subscriptionDetails.plan,
         description: subscriptionDetails.description,
         duration: subscriptionDetails.duration,
@@ -454,6 +456,7 @@ router.get('/subscription-status', authenticate, async (req, res) => {
       );
 
       return {
+        _id:subscriptionDetails._id,
         plan: subscriptionDetails.plan,
         description: subscriptionDetails.description,
         duration: subscriptionDetails.duration,
@@ -518,13 +521,14 @@ router.get('/watch-later', authenticate, async (req, res) => {
 
     const totalMovies = await Movie.countDocuments({ _id: { $in: movieIds } });
 
-    const watchLaterMovies = movies.map(movie => {
+    const data = movies.map(movie => {
       // Cumulative rating
       const cumulativeRating = movie.rating.length > 0
         ? movie.rating.reduce((sum, entry) => sum + entry.rating, 0) / movie.rating.length
         : 0; 
 
       return {
+        _id:movie._id,
         title: movie.title,
         thumbnail: movie.thumbnail,
         cumulativeRating: cumulativeRating.toFixed(1),
@@ -533,7 +537,7 @@ router.get('/watch-later', authenticate, async (req, res) => {
 
     return res.status(200).json({
       success:true,
-      watchLaterMovies,
+      data,
       currentPage: pageNumber,
       totalPages: Math.ceil(totalMovies / limitNumber), 
       totalMovies
@@ -571,6 +575,7 @@ router.get('/watch-history', authenticate, async (req, res) => {
     const data = movies.map(movie => {watchHistoryEntries.find(entry => entry.movie_id.toString() === movie._id.toString());
 
       return {
+        _id:movie._id,
         title: movie.title,
         thumbnail: movie.thumbnail,
       };
