@@ -82,6 +82,7 @@ router.post('/login', (req, res) => {
             );
             const serializedData ={
               token:token,
+              isSubscribed:user.isSubscribed
             }
 
             return res.status(200).json(commonResponse(true, serializedData,'Successfully Logged In'));
@@ -273,10 +274,10 @@ router.get('/movie-detail-page/:movie_id', authenticate, async (req, res) => {
   const movie_id = req.params.movie_id; 
 
   try {
-    const { isSubscribed } = req.user;
-    if(!isSubscribed){
-      return res.status(400).json(commonResponse(false,null,'Please subscribe a plan'))
-   }
+  //   const { isSubscribed } = req.user;
+  //   if(!isSubscribed){
+  //     return res.status(400).json(commonResponse(false,null,'Please subscribe a plan'))
+  //  }
     const movie = await Movie.findById(movie_id);
     if (movie && movie!=null) {
       const serializedData = {
@@ -414,6 +415,9 @@ router.get('/plan-detail-page/:plan_id', authenticate, async (req, res) => {
 
 router.get('/subscription-status', authenticate, async (req, res) => {
   try {
+    const { page = 1, limit = 1 } = req.query; 
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
     const userId = (req.user._id);
 
     // Find all subscriptions that have this user's ID in the user_subscriptions array
@@ -422,7 +426,7 @@ router.get('/subscription-status', authenticate, async (req, res) => {
     });
 
     if (subscriptions.length === 0) {
-      return res.status(200).json(commonResponse(true,null,"You haven't purchased any plans yet."));
+      return res.status(200).json(commonResponse(true, null, "You haven't purchased any plans yet."));
     }
 
     const userSubscriptions = subscriptions.flatMap(subscription => 
@@ -431,16 +435,38 @@ router.get('/subscription-status', authenticate, async (req, res) => {
 
     const currentDate = new Date();
 
+    // Filter current and previous subscriptions
     const currentSubscriptions = userSubscriptions.filter(sub => new Date(sub.validityTo) > currentDate);
     const previousSubscriptions = userSubscriptions.filter(sub => new Date(sub.validityTo) <= currentDate);
 
-   const serializedCurrent = currentSubscriptions.map(sub => {
+    // Paginate previous subscriptions
+    const totalPreviousSubscriptions = previousSubscriptions.length;
+    const paginatedPreviousSubscriptions = previousSubscriptions
+      .slice((pageNumber - 1) * limitNumber, pageNumber * limitNumber); // Slice for pagination
+
+    const serializedCurrent = currentSubscriptions.map(sub => {
       const subscriptionDetails = subscriptions.find(subscription => 
         subscription.user_subscriptions.some(userSub => userSub.user_id.toString() === userId.toString() && userSub._id.equals(sub._id))
       );
 
       return {
-        _id:subscriptionDetails._id,
+        _id: subscriptionDetails._id,
+        plan: subscriptionDetails.plan,
+        description: subscriptionDetails.description,
+        duration: subscriptionDetails.duration,
+        price: subscriptionDetails.price,
+        subscribedDate: sub.subscribedDate.toISOString().split('T')[0],
+        validityTo: sub.validityTo.toISOString().split('T')[0],
+      };
+    });
+
+    const serializedPrevious = paginatedPreviousSubscriptions.map(sub => {
+      const subscriptionDetails = subscriptions.find(subscription => 
+        subscription.user_subscriptions.some(userSub => userSub.user_id.toString() === userId.toString() && userSub._id.equals(sub._id))
+      );
+
+      return {
+        _id: subscriptionDetails._id,
         plan: subscriptionDetails.plan,
         description: subscriptionDetails.description,
         duration: subscriptionDetails.duration,
@@ -450,28 +476,20 @@ router.get('/subscription-status', authenticate, async (req, res) => {
       };
     });
 
-    const serializedPrevious = previousSubscriptions.map(sub => {
-      const subscriptionDetails = subscriptions.find(subscription => 
-        subscription.user_subscriptions.some(userSub => userSub.user_id.toString() === userId.toString() && userSub._id.equals(sub._id))
-      );
+    return res.status(200).json(commonResponse(true, {
+      currentPlans: serializedCurrent,
+      previousPlans: serializedPrevious,
+      totalPrevious: totalPreviousSubscriptions,  // Provide total for pagination
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalPreviousSubscriptions / limitNumber)
+    }, 'Successfully found the plans.'));
 
-      return {
-        _id:subscriptionDetails._id,
-        plan: subscriptionDetails.plan,
-        description: subscriptionDetails.description,
-        duration: subscriptionDetails.duration,
-        price: subscriptionDetails.price,
-        subscribedDate: sub.subscribedDate,
-        validityTo: sub.validityTo,
-      };
-    });
-
-    return res.status(200).json(commonResponse(true,{currentPlans: serializedCurrent,previousPlans: serializedPrevious,},'Successfully found the plans.'));
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json(commonResponse(false,null,'Internal server error'));
+    return res.status(500).json(commonResponse(false, null, 'Internal server error'));
   }
 });
+
 
 
 
@@ -593,10 +611,10 @@ router.get('/watch-history', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/watch-history/:movieId', authenticate, async (req, res) => {
+router.delete('/watch-later/:movie_id', authenticate, async (req, res) => {
   try {
     const userId = req.user._id; 
-    const { movieId } = req.params; 
+    const { movie_id } = req.params; 
 
     const user = await User.findById(userId);
 
@@ -604,13 +622,13 @@ router.delete('/watch-history/:movieId', authenticate, async (req, res) => {
       return res.status(404).json(commonResponse(false,null,'User not found'));
     }
 
-    user.watch_history = user.watch_history.filter(entry => 
-      entry.movie_id.toString() !== movieId.toString()
+    user.watch_later = user.watch_later.filter(entry => 
+      entry.movie_id.toString() !== movie_id.toString()
     );
 
     await user.save();
 
-    return res.status(200).json(commonResponse(true,null,'Movie removed from watch history successfully'));
+    return res.status(200).json(commonResponse(true,null,'Movie removed from watch later successfully'));
   } catch (error) {
     return res.status(500).json(commonResponse(false,null,'Internal server error'));
   }
