@@ -1,11 +1,19 @@
 var createError = require('http-errors');
 var express = require('express');
+const session = require('express-session');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
 
 var app = express();
+
+// session setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'default-secret-key',
+  resave: false,
+  saveUninitialized: true,
+}));
 
 //database connection
 const db = require('./database/db')
@@ -30,11 +38,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api');
+var movieRouter = require('./routes/movie');
 
 //routes
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api', apiRouter);
+app.use('/movie',movieRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

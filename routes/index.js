@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const bcrypt = require('bcrypt');
+const Admin = require('../modals/adminModel');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -11,35 +12,35 @@ router.get('/login', (req, res) => {
   res.render('login',{ errors: [],message:null })
 });
 
-// router.post('/login', async (req, res) => {
-//   const { email, password } = req.body;
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const errors = [];
 
-//     let foundUser;
-//     User.findOne({ email })
-//     .then(user => {
-//       console.log(user)
-//       if (!user) {
-//         errors.push( {msg: 'Incorrect Email Address.'});
-//         return res.render('login',{errors: errors });
-//       }
-//       foundUser= user;
-//       return bcrypt.compare(password, user.password);
-//     })
-//     .then(isPasswordValid => {
-//       if (!isPasswordValid) {
-//         errors.push( {msg: 'Incorrect Password.'});
-//         return res.render('login', {errors: errors });
-//       }
+    let foundAdmin;
+    Admin.findOne({ email })
+    .then(admin => {
+      console.log(admin)
+      if (!admin) {
+        errors.push( {msg: 'Incorrect Email Address.'});
+        return res.render('login',{errors: errors });
+      }
+      foundAdmin= admin;
+      return bcrypt.compare(password, admin.password);
+    })
+    .then(isPasswordValid => {
+      if (!isPasswordValid) {
+        errors.push( {msg: 'Incorrect Password.'});
+        return res.render('login', {errors: errors });
+      }
 
-//       // Set user's ID and email in the session
-//       req.session.userId = foundUser._id;
-//       req.session.userEmail = foundUser.email;
-//       res.redirect('/movie/movie-listing-page');
-//     })
-//     .catch(error => {
-//       console.error(error);
-//       res.redirect('/login');
-//     });
-  
-// });
+      // Set user's ID and email in the session
+      req.session.adminId = foundAdmin._id;
+      req.session.adminEmail = foundAdmin.email;
+      res.redirect('/movie/movie-listing-page');
+    })
+    .catch(error => {
+      console.error(error);
+      res.redirect('/login');
+    });
+});
 module.exports = router;
