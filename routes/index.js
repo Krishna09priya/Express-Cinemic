@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const Admin = require('../modals/adminModel');
 
 /* GET home page. */
@@ -19,7 +21,6 @@ router.post('/login', async (req, res) => {
     let foundAdmin;
     Admin.findOne({ email })
     .then(admin => {
-      console.log(admin)
       if (!admin) {
         errors.push( {msg: 'Incorrect Email Address.'});
         return res.render('login',{errors: errors });

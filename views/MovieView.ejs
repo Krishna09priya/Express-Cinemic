@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add movie</title>
+    <title>Movie view page</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
      <style>
         .nav-link {
             margin-right: 20px; 
@@ -18,32 +17,51 @@
         .nav-item{
             font-weight: bold;
         }
-        .form-container {
-            width:75%;
-            margin-top: 50px;
+        .movie-container {
+            margin-top: 30px;
+            text-align: center;
         }
-        .form-heading {
-            font-size: 1.5rem;
+        .movie-title {
+            font-size: 2rem;
             font-weight: bold;
             margin-bottom: 20px;
         }
-        .form-group label {
+        .movie-thumbnail {
+            border-radius: 10px;
+        }
+        .movie-description {
+            margin-top: 20px;
+        }
+        .movie-rating {
             font-weight: bold;
-        }
-        .form-group input, .form-group textarea {
-            font-size: 1rem;
-        }
-        .form-group .input-group-text {
-            background-color: white;
-            border-right: none;
-        }
-        .form-group .form-control {
-            border-left: none;
+            margin-top: 10px;
         }
         .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-top: 20px;
+        }
+        .thumbnail-video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        .movie-thumbnail,.movie-video {
+        width: 300px; 
+        height: 200px; 
+        }
+
+        .movie-thumbnail img,.movie-video iframe {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* This ensures the content fits within the dimensions */
+        }
+
+        .mr-2 {
+        margin-right: 10px;
+        }
+
+        .ml-2 {
+        margin-left: 10px;
         }
         #reports{
             margin-top:2px; 
@@ -59,7 +77,10 @@
         #button{
             width: 75px;
         }
-        
+        .link{
+            text-decoration: none;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -95,41 +116,28 @@
                 </ul>
             </div>
         </nav>
-        <div class="form-container">
-            <div class="form-heading">Add a New Movie</div>
-            <form method="post" action="/movie/movie-add">
-                <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" class="form-control" id="title" placeholder="Enter movie title" name="title" required>
+         <div class="movie-container">
+            <div class="movie-title"><%=movie.title%></div>
+            <div class="thumbnail-video-container">
+                <div class="movie-thumbnail mr-2">
+                    <img src="<%=movie.thumbnail%>" alt="Movie Thumbnail" class="img-fluid">
                 </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea class="form-control" id="description" rows="3" placeholder="Enter movie description" name="description" required></textarea>
+                <div class="movie-video ml-2">
+                    <iframe width="1128" height="634" src="<%=movie.video%>" title="youtube video" frameborder="0" class="video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                 </div>
-                <div class="form-group">
-                    <label for="thumbnail">Thumbnail</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="thumbnail" name="thumbnail" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="video">Video</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="video" name="video" required>
-                    </div>
-                </div>
-                 <!-- error display -->
-            <% if (error) { %>
-                <p style="color: red;"><%= error %></p>
-              <% } %>
-              <% if (success) { %>
-                <p style="color: green;"><%= success %></p>
-              <% } %>
-                <div class="form-actions">
-                    <a href="/movie/movie-listing-page" class="btn btn-secondary" id="button">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-3" id="button">Save</button>
-                </div>
-            </form>
+            </div>
+            <div class="movie-description">
+                <h5>Description:</h5>
+                <p><%=movie.description %></p>
+            </div>
+            <div class="movie-rating">
+                Rating: 4.5/5
+            </div>
+            <div class="form-actions">
+                <a href="/movie/movie-listing-page" class="btn btn-secondary mr-5" id="button">Back</a>
+                <a href="/movie/movie-update/<%= movie._id %>" class="link btn btn-primary" id="button">Edit</a>
+            </div>
         </div>
     </div>
 </body>

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 const Schema = mongoose.Schema;
 
 const watchHistorySchema = new Schema ({
@@ -79,6 +80,8 @@ const userSchema = new Schema({
     watch_later:[watchLaterSchema]
     
 });
+
+userSchema.plugin(mongoosePaginate);
 
 const User = mongoose.model('User', userSchema);
 
