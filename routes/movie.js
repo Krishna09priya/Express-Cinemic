@@ -11,6 +11,8 @@ const isAuthenticated = (req, res, next) => {
     res.redirect('/login'); 
   };
 
+  module.exports = isAuthenticated;
+
   router.get('/movie-listing-page', (req, res) => {
     // Set default page and limit with validation
     const page = parseInt(req.query.page, 10) || 1;
@@ -18,7 +20,7 @@ const isAuthenticated = (req, res, next) => {
 
     // Ensure page and limit are positive integers
     if (page < 1 || limit < 1) {
-        return res.status(400).send('Page and limit must be positive integers.');
+        return res.send('Page and limit must be positive integers.');
     }
 
     const options = {
@@ -114,4 +116,4 @@ router.get('/movie-view/:id', (req , res) =>{
     });
 })
 
-module.exports = { router, authenticate };
+module.exports = router;
