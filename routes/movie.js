@@ -37,6 +37,18 @@ const isAuthenticated = (req, res, next) => {
         });
 });
 
+router.get('/search-movie', async (req, res) => {
+  const searchTerm = req.query.search;
+  try {
+    const movies = await Movie.find({
+      title: { $regex: '^' + searchTerm, $options: 'i' } 
+    });
+    res.render('movieListingPage', { movies, pagination: {} }); 
+  } catch (error) {
+    console.error(error);
+  }
+});
+
   router.get('/movie-add',function(req, res) {
     res.render('movieAdd', {error:null, success:null});
   });

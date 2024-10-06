@@ -40,7 +40,7 @@ const subscriptionSchema = new Schema ({
         type:Number,
         required:true
     },
-    isEnable:{
+    isEnabled:{
         type:Boolean,
         default:true
     },
