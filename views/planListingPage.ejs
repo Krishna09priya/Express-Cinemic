@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
      <style>
         .nav-link {
             margin-right: 20px; 
@@ -42,10 +44,9 @@
             font-weight: bold; 
             font-size:1.1rem;
         }
-        #button{
+        .blockbtn{
             width: 75px;
         }
-        
     </style>
 </head>
 <body>
@@ -85,8 +86,8 @@
         <div class="mt-5 mb-3">
             <div class="row">
                 <div class="col-sm-8">
-                     <form accept="users/search-plan" method="post" class="input-group">
-                        <input type="text" class="form-control" placeholder="Search movies..." name="search">
+                     <form action="/users/search-plan" method="get" class="input-group">
+                        <input type="text" class="form-control" placeholder="Search plans..." name="search">
                         <div class="input-group-append">
                             <button class="input-group-text" type="submit">
                                 <i class="fas fa-search"></i>
@@ -118,11 +119,11 @@
                     <td><%=plan.price%></td>
                     <td><%=plan.description%></td>
                     <td> <button 
-                        class="btn btn-toggle blockbtn <%= plan.isEnabled ? 'btn-disable' : 'btn-enable' %>" 
+                        class="btn btn-toggle blockbtn <%= plan.isEnabled ? 'btn-enable' : 'btn-disable' %>" 
                         id="button-<%= plan._id %>" 
                         data-id="<%= plan._id %>" 
                         onclick="toggleStatus(this)">
-                        <%= plan.isEnabled ? 'disable' : 'enable' %>
+                        <%= plan.isEnabled ? 'Disable' : 'Enable' %>
                     </button></td>
                     </tr>
                 </tbody>
@@ -157,33 +158,31 @@
     </div>
     <script>
         function toggleStatus(button) {
-    const planId = button.getAttribute('data-id');
-    const currentStatus = button.textContent.trim(); // 'Block' or 'Unblock'
-    
-    axios.post(`/users/toggle-block/${planId}`)
-        .then(response => {
-            console.log(response);
-            if (response.data.success) {
-                // Toggle the button's appearance and text based on the new status
-                if (currentStatus === 'disable') {
-                    button.classList.remove('btn-disable');
-                    button.classList.add('btn-enable');
-                    button.textContent = 'Enable';
-                } else {
-                    button.classList.remove('btn-enable');
-                    button.classList.add('btn-disable');
-                    button.textContent = 'Disable';
-                }
-            } else {
-                alert('Failed to update user status');
-            }
-        })
-        .catch(error => {
-            console.error('Error updating status:', error);
-            alert('Error updating status');
-        });
-}
-
-</script>
+            const planId = button.getAttribute('data-id');
+            const currentStatus = button.textContent.trim();
+            
+            axios.post(`/users/toggle-enable/${planId}`)
+                .then(response => {
+                    console.log(response);
+                    if (response.data.success) {
+                        // Toggle the button's appearance and text based on the new status
+                        if (currentStatus === 'Disable') {
+                            button.classList.remove('btn-enable');
+                            button.classList.add('btn-disable');
+                            button.textContent = 'Enable';
+                        } else {
+                            button.classList.remove('btn-disable');
+                            button.classList.add('btn-enable');
+                            button.textContent = 'Disable';
+                        }
+                    } else {
+                        alert('Failed to update plan status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating status:', error);
+                });
+        }
+    </script>
 </body>
 </html>

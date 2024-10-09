@@ -18,11 +18,6 @@ const isAuthenticated = (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 5;
 
-    // Ensure page and limit are positive integers
-    if (page < 1 || limit < 1) {
-        return res.send('Page and limit must be positive integers.');
-    }
-
     const options = {
         page,
         limit,
@@ -43,7 +38,7 @@ router.get('/search-movie', async (req, res) => {
     const movies = await Movie.find({
       title: { $regex: '^' + searchTerm, $options: 'i' } 
     });
-    res.render('movieListingPage', { movies, pagination: {} }); 
+    res.render('movieListingPage', { movies, pagination:null}); 
   } catch (error) {
     console.error(error);
   }
