@@ -96,7 +96,7 @@
                     </form>
                 </div>
                     <div class="col-sm-4 text-right mt-1">
-                    <button class="btn btn-outline-primary"><a href="/users/addplan">Add Plan</a></button>
+                    <button class="btn btn-outline-primary"><a href="/users/plan-add">Add Plan</a></button>
                     </div>
             </div>
 
@@ -107,6 +107,7 @@
                         <th>Plan</th>
                         <th>Duration</th>
                         <th>Price</th>
+                        <th>Tagline</th>
                         <th>Description</th>
                         <th>Status</th>
                     </tr>
@@ -117,7 +118,8 @@
                     <td><%=plan.plan%></td>
                     <td><%=plan.duration%></td>
                     <td><%=plan.price%></td>
-                    <td><%=plan.description%></td>
+                    <td><%=plan.tagline%></td>
+                    <td><%=plan.detailedDescription%></td>
                     <td> <button 
                         class="btn btn-toggle blockbtn <%= plan.isEnabled ? 'btn-enable' : 'btn-disable' %>" 
                         id="button-<%= plan._id %>" 
@@ -130,6 +132,7 @@
                 <%})%>
             </table>
 
+            <% if (pagination && pagination.page) { %>
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <!-- Previous Page Link -->
@@ -154,6 +157,7 @@
                     </li>
                 </ul>
             </nav>
+            <% } %>
         </div>
     </div>
     <script>

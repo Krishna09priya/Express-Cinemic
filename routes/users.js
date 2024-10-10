@@ -218,7 +218,7 @@ router.get('/search-plan', async (req, res) => {
       const plans = await Subscription.find({
         plan: { $regex: '^' + searchTerm, $options: 'i' } 
       });
-      res.render('planListingPage', { plans, pagination: {} }); 
+      res.render('planListingPage', { plans, pagination: null }); 
     } catch (error) {
       console.error(error);
     }
@@ -243,6 +243,22 @@ router.get('/search-plan', async (req, res) => {
     } catch (error) {
         console.error('Error toggling plan status:', error);
     }
+});
+
+router.get('/plan-add',function(req, res) {
+  res.render('planCreate', {error:null, success:null});
+});
+
+router.post('/plan-add',async (req, res) => {
+  const { plan,duration,price,tagline,detailedDescription } = req.body;
+  try {
+      const newPlan = new Subscription({plan,duration,price,tagline,detailedDescription});
+      await newPlan.save();
+
+      res.render('planCreate', { success: 'Plan added successfully!', error:null });
+  } catch (error) {
+      res.render('planCreate', { error: 'Something went wrong. Please try again.', success:null });
+  }
 });
 
 

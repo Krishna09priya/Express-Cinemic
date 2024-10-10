@@ -24,7 +24,7 @@ const subscriptionSchema = new Schema ({
         type:String,
         required:true
     },
-    description:{
+    tagline:{
         type:String,
         required:true
     },
