@@ -123,4 +123,80 @@ router.get('/movie-view/:id', (req , res) =>{
     });
 })
 
+router.get('/view-count', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;  
+  const limit = parseInt(req.query.limit) || 5;  
+  const skip = (page - 1) * limit;  
+
+  try {
+    const totalMovies = await Movie.countDocuments();
+
+    const movieViewCounts = await Movie.aggregate([
+      {
+        $project: {
+          title: 1, 
+          viewCount: { $size: { $ifNull: ["$watch_history", []] } }  
+        }
+      },
+      { $skip: skip }, 
+      { $limit: limit }  
+    ]);
+
+    const totalPages = Math.ceil(totalMovies / limit);  
+
+    
+    const pagination = {
+      page: page,
+      limit: limit,
+      totalPages: totalPages
+    };
+
+    res.render('movieViewCount', {
+      movies: movieViewCounts,
+      pagination: pagination
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+router.get('/movie-rating', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;  
+  const limit = parseInt(req.query.limit) || 5;  
+  const skip = (page - 1) * limit;  
+
+  try {
+    const totalMovies = await Movie.countDocuments();
+
+    const movieRatingCounts = await Movie.aggregate([
+      {
+        $project: {
+          title: 1, 
+          averageRating: { $avg: "$rating.rating" } 
+        }
+      },
+      { $skip: skip }, 
+      { $limit: limit }  
+    ]);
+
+    const totalPages = Math.ceil(totalMovies / limit);  
+
+    
+    const pagination = {
+      page: page,
+      limit: limit,
+      totalPages: totalPages
+    };
+
+    res.render('movieRatingReport', {
+      movies: movieRatingCounts,
+      pagination: pagination
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+
+
 module.exports = router;
