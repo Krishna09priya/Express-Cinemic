@@ -230,5 +230,50 @@ router.get('/movie-rating',isAuthenticated, async (req, res) => {
 });
 
 
+router.get('/revenue', isAuthenticated, async (req, res) => {
+  try {
+      const selectedYear = parseInt(req.query.year) || new Date().getFullYear();
+      const startDate = new Date(`${selectedYear}-01-01`); 
+      const endDate = new Date(`${selectedYear + 1}-01-01`); 
+
+      const monthlyRevenue = await Subscription.aggregate([
+        { 
+          $unwind: "$user_subscriptions"  
+        },
+        { 
+          $match: {
+            "user_subscriptions.subscribedDate": { 
+              $gte: startDate, 
+              $lte: endDate 
+            }
+          } 
+        },
+        {
+          $group: {
+            _id: { month: { $month: "$user_subscriptions.subscribedDate" } },
+            totalRevenue: { $sum: "$price" }  
+          }
+        },
+        {
+          $sort: { "_id.month": 1 } 
+        }
+      ]);
+
+      console.log('monthlyRevenue',monthlyRevenue);
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const revenueByMonth = {};
+      
+      monthlyRevenue.forEach(revenue => {
+          revenueByMonth[monthNames[revenue._id - 1]] = revenue.totalRevenue; 
+      });
+      console.log('revenueByMonth',revenueByMonth);
+      res.render('monthlyRevenueReport', { revenueData: revenueByMonth, selectedYear }); 
+  } catch (error) {
+      console.error(error);
+  }
+});
+
+
+
 
 module.exports = router;
