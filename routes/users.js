@@ -1,12 +1,18 @@
 var express = require('express');
 var router = express.Router();
-const { isAuthenticated } = require('./movie');
 const User = require('../modals/userModel');
 const Movie = require('../modals/movieModel');
 const Subscription = require('../modals/subscriptionModel');
 
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.adminId) {
+    return next();
+  }
+  res.redirect('/login'); 
+};
+
 /* GET users listing. */
-router.get('/user-listing-page', function(req, res, next) {
+router.get('/user-listing-page',isAuthenticated,function(req, res, next) {
   const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 5;
 
@@ -24,7 +30,7 @@ router.get('/user-listing-page', function(req, res, next) {
         });
 });
 
-router.get('/search-user', async (req, res) => {
+router.get('/search-user',isAuthenticated, async (req, res) => {
     const searchTerm = req.query.search;
     try {
       const users = await User.find({
@@ -37,7 +43,7 @@ router.get('/search-user', async (req, res) => {
   });
   
 
-router.post('/toggle-block/:id', async (req, res) => {
+router.post('/toggle-block/:id',isAuthenticated, async (req, res) => {
     try {
         // Find the user by ID
         const user = await User.findById(req.params.id);
@@ -59,7 +65,7 @@ router.post('/toggle-block/:id', async (req, res) => {
     }
 });
 
-router.get('/user-view/:id', async (req, res) => {
+router.get('/user-view/:id',isAuthenticated, async (req, res) => {
   const userId = req.params.id;
 
   try {
@@ -194,7 +200,7 @@ router.get('/user-view/:id', async (req, res) => {
 
 //SUBSCRIPTIONS RELATED PAGE
 
-router.get('/plan-listing-page', function(req, res, next) {
+router.get('/plan-listing-page',isAuthenticated, function(req, res, next) {
     const page = parseInt(req.query.page, 10) || 1;
       const limit = parseInt(req.query.limit, 10) || 5;
   
@@ -212,7 +218,7 @@ router.get('/plan-listing-page', function(req, res, next) {
           });
   });
 
-router.get('/search-plan', async (req, res) => {
+router.get('/search-plan',isAuthenticated, async (req, res) => {
     const searchTerm = req.query.search;
     try {
       const plans = await Subscription.find({
@@ -224,7 +230,7 @@ router.get('/search-plan', async (req, res) => {
     }
   });
 
-  router.post('/toggle-enable/:id', async (req, res) => {
+  router.post('/toggle-enable/:id',isAuthenticated, async (req, res) => {
     try {
         const plan = await Subscription.findById(req.params.id);
         
@@ -245,11 +251,11 @@ router.get('/search-plan', async (req, res) => {
     }
 });
 
-router.get('/plan-add',function(req, res) {
+router.get('/plan-add',isAuthenticated,function(req, res) {
   res.render('planCreate', {error:null, success:null});
 });
 
-router.post('/plan-add',async (req, res) => {
+router.post('/plan-add',isAuthenticated,async (req, res) => {
   const { plan,duration,price,tagline,detailedDescription } = req.body;
   try {
       const newPlan = new Subscription({plan,duration,price,tagline,detailedDescription});
