@@ -3,6 +3,8 @@ var router = express.Router();
 const User = require('../modals/userModel');
 const Movie = require('../modals/movieModel');
 const Subscription = require('../modals/subscriptionModel');
+const Admin = require('../modals/adminModel');
+const bcrypt = require('bcrypt');
 
 const isAuthenticated = (req, res, next) => {
     if (req.session && req.session.adminId) {
@@ -11,9 +13,9 @@ const isAuthenticated = (req, res, next) => {
     res.redirect('/login'); 
   };
 
-  module.exports = isAuthenticated;
+  module.exports = {isAuthenticated};
 
-  router.get('/movie-listing-page', (req, res) => {
+  router.get('/movie-listing-page',isAuthenticated, (req, res) => {
     // Set default page and limit with validation
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 5;
@@ -32,7 +34,7 @@ const isAuthenticated = (req, res, next) => {
         });
 });
 
-router.get('/search-movie', async (req, res) => {
+router.get('/search-movie',isAuthenticated, async (req, res) => {
   const searchTerm = req.query.search;
   try {
     const movies = await Movie.find({
@@ -44,11 +46,11 @@ router.get('/search-movie', async (req, res) => {
   }
 });
 
-  router.get('/movie-add',function(req, res) {
+  router.get('/movie-add',isAuthenticated,function(req, res) {
     res.render('movieAdd', {error:null, success:null});
   });
 
-  router.post('/movie-add',async (req, res) => {
+  router.post('/movie-add',isAuthenticated,async (req, res) => {
     const { title,description,thumbnail,video } = req.body;
     try {
         const newMovie = new Movie({title,description,thumbnail,video });
@@ -60,7 +62,7 @@ router.get('/search-movie', async (req, res) => {
     }
 });
 
-router.get('/movie-update/:id', (req , res) =>{
+router.get('/movie-update/:id',isAuthenticated, (req , res) =>{
   const movieId = req.params.id;
  Movie.findById(movieId).lean().then(movie =>{
       res.render('movieUpdate',{movie:movie,error: null})
@@ -69,7 +71,7 @@ router.get('/movie-update/:id', (req , res) =>{
     });
 })
 
-router.post('/movie-update/:id', (req, res) => {
+router.post('/movie-update/:id', isAuthenticated,(req, res) => {
   const movieId = req.params.id;
   const { title,description,thumbnail,video} = req.body;
 
@@ -91,7 +93,7 @@ router.post('/movie-update/:id', (req, res) => {
     }
   })
 
-  router.delete('/delete/:id', (req, res) => {
+  router.delete('/delete/:id',isAuthenticated, (req, res) => {
     const movieId = req.params.id;
     console.log("Deleting movie with ID:", movieId);
 
@@ -114,7 +116,7 @@ router.post('/movie-update/:id', (req, res) => {
         });
 });
 
-router.get('/movie-view/:id', (req , res) =>{
+router.get('/movie-view/:id',isAuthenticated, (req , res) =>{
   const movieId = req.params.id;
  Movie.findById(movieId).lean().then(movie =>{
       res.render('movieView',{movie:movie,error: null})
@@ -123,7 +125,37 @@ router.get('/movie-view/:id', (req , res) =>{
     });
 })
 
-router.get('/view-count', async (req, res) => {
+router.get('/change-password',isAuthenticated, (req, res) => {
+  res.render('changePassword',{message:null}); 
+});
+
+router.post('/change-password',isAuthenticated, async (req, res) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  try {
+      if (newPassword !== confirmNewPassword) {
+          return res.render('changePassword', { message: 'New password and confirmation do not match.' });
+      }
+
+      const adminId = req.session.adminId; 
+      const admin = await Admin.findById(adminId);
+
+      const isMatch = await bcrypt.compare(currentPassword, admin.password);
+      if (!isMatch) {
+          return res.render('changePassword', { message: 'Current password is incorrect.' });
+      }
+
+      admin.password = await bcrypt.hash(newPassword, 10);
+      await admin.save();
+
+      return res.render('changePassword', { message: 'Password updated successfully.' });
+  } catch (error) {
+      console.error(error);
+  }
+});
+
+
+router.get('/view-count',isAuthenticated, async (req, res) => {
   const page = parseInt(req.query.page) || 1;  
   const limit = parseInt(req.query.limit) || 5;  
   const skip = (page - 1) * limit;  
@@ -160,7 +192,7 @@ router.get('/view-count', async (req, res) => {
   }
 });
 
-router.get('/movie-rating', async (req, res) => {
+router.get('/movie-rating',isAuthenticated, async (req, res) => {
   const page = parseInt(req.query.page) || 1;  
   const limit = parseInt(req.query.limit) || 5;  
   const skip = (page - 1) * limit;  
