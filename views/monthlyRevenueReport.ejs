@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
      <style>
         .nav-link {
             margin-right: 20px; 
@@ -74,14 +75,12 @@
             </div>
         </nav>
 
-        <h2 class="mt-3">Monthly Revenue Report </h2>
+        <h2 class="mt-3">Monthly Revenue Report for <span id="year-title"><%= selectedYear %></span></h2>
         <label for="year">Select Year: </label>
         <select class="form-control" id="year" name="year">
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
+            <% for (let i = currentYear; i >= 2020; i--) { %>
+                <option value="<%= i %>" <%= i === selectedYear ? 'selected' : '' %>><%= i %></option>
+            <% } %>
         </select>
 
 
@@ -93,14 +92,53 @@
                         <th>Revenue</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>April</td>
-                        <td>12000000</td>
-                    </tr>
+                <tbody id="revenue-body">
+                    <% revenueData.forEach(revenue => { %>
+                        <tr>
+                            <td><%= revenue.month %></td>
+                            <td><%= revenue.totalRevenue %></td>
+                        </tr>
+                    <% }) %>
                 </tbody>
             </table>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearSelect = document.getElementById('year');
+            const yearTitle = document.getElementById('year-title');
+            const revenueBody = document.getElementById('revenue-body');
+
+    
+            yearSelect.addEventListener('change', function() {
+                const selectedYear = yearSelect.value;
+
+                
+                axios.get('/movie/revenue', {
+                    params: {
+                        year: selectedYear
+                    }
+                })
+                .then(function (response) {
+                    
+                    yearTitle.textContent = selectedYear;
+
+                    let revenueRows = '';
+                    response.data.revenueData.forEach(revenue => {
+                        revenueRows += `
+                            <tr>
+                                <td>${revenue.month}</td>
+                                <td>${revenue.totalRevenue}</td>
+                            </tr>
+                        `;
+                    });
+                    revenueBody.innerHTML = revenueRows;  
+                })
+                .catch(function (error) {
+                    console.error('Error fetching revenue data:', error);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
