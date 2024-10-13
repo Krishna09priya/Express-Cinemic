@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie view page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+     <style>
+        .nav-link {
+            margin-right: 20px; 
+            font-size: 1.1rem; 
+        }
+        .nav-item{
+            font-weight: bold;
+        }
+        .movie-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .movie-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .movie-thumbnail {
+            border-radius: 10px;
+        }
+        .movie-description {
+            margin-top: 20px;
+        }
+        .movie-rating {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .form-actions {
+            margin-top: 20px;
+        }
+        .thumbnail-video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        .movie-thumbnail,.movie-video {
+        width: 300px; 
+        height: 200px; 
+        }
+
+        .movie-thumbnail img,.movie-video iframe {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* This ensures the content fits within the dimensions */
+        }
+
+        .mr-2 {
+        margin-right: 10px;
+        }
+
+        .ml-2 {
+        margin-left: 10px;
+        }
+        #reports{
+            margin-top:2px; 
+            font-weight:bold; 
+            color: #808080; 
+            font-size:1.1rem;
+        }
+        #admin{
+            margin-top: 8px; 
+            font-weight: bold; 
+            font-size:1.1rem;
+        }
+        #button{
+            width: 75px;
+        }
+        .link{
+            text-decoration: none;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="#"><img src="/images/logo-transparent.png" alt="Logo"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/movie/movie-listing-page">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/users/user-listing-page">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/users/plan-listing-page">Subscription Plans</a></li>
+                    <li class="nav-item dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" id="reports">Reports</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/movie/revenue">Revenue Report</a>
+                            <a class="dropdown-item" href="/movie/view-count">Movie View Count</a>
+                            <a class="dropdown-item" href="/movie/monthly-subscription">Monthly Subscription Report</a>
+                            <a class="dropdown-item" href="/movie/movie-rating">Movie Rating Report</a>
+                        </div>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" id="admin"><i class="fas fa-user"></i> Admin</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Change Password</a>
+                            <a class="dropdown-item" href="/logout">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+         <div class="movie-container">
+            <div class="movie-title"><%=movie.title%></div>
+            <div class="thumbnail-video-container">
+                <div class="movie-thumbnail mr-2">
+                    <img src="<%=movie.thumbnail%>" alt="Movie Thumbnail" class="img-fluid">
+                </div>
+                <div class="movie-video ml-2">
+                    <iframe width="1128" height="634" src="<%=movie.video%>" title="youtube video" frameborder="0" class="video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="movie-description">
+                <h5>Description:</h5>
+                <p><%=movie.description %></p>
+            </div>
+            <div class="movie-rating">
+                Rating: 4.5/5
+            </div>
+            <div class="form-actions">
+                <a href="/movie/movie-listing-page" class="btn btn-secondary mr-5" id="button">Back</a>
+                <a href="/movie/movie-update/<%= movie._id %>" class="link btn btn-primary" id="button">Edit</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
