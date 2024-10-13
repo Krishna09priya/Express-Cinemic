@@ -194,7 +194,7 @@ const authenticate = async (req, res, next) => {
 };
 
 router.get('/movies', authenticate, async (req, res) => {
-  const { search, page = 1, limit = 2 } = req.query; 
+  const { search, page = 1, limit = 6 } = req.query; 
   const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);
 
@@ -353,7 +353,7 @@ router.post('/rating', authenticate, async (req, res) => {
 
 router.get('/plans', authenticate, async (req, res) => {
   try {
-    const { page = 1, limit = 2 } = req.query; 
+    const { page = 1, limit = 4 } = req.query; 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
@@ -367,7 +367,7 @@ router.get('/plans', authenticate, async (req, res) => {
       const serializedData = subscriptions.map(subscription => ({
         _id:subscription._id,
         plan: subscription.plan,
-        description: subscription.description,
+        description: subscription.tagline,
         duration: subscription.duration,
         price: subscription.price
       }));
@@ -414,7 +414,7 @@ router.get('/plan-detail-page/:plan_id', authenticate, async (req, res) => {
 
 router.get('/subscription-status', authenticate, async (req, res) => {
   try {
-    const { page = 1, limit = 1 } = req.query; 
+    const { page = 1, limit =  1} = req.query; 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const userId = (req.user._id);
@@ -451,7 +451,7 @@ router.get('/subscription-status', authenticate, async (req, res) => {
       return {
         _id: subscriptionDetails._id,
         plan: subscriptionDetails.plan,
-        description: subscriptionDetails.description,
+        description: subscriptionDetails.tagline,
         duration: subscriptionDetails.duration,
         price: subscriptionDetails.price,
         subscribedDate: sub.subscribedDate.toISOString().split('T')[0],
@@ -467,7 +467,7 @@ router.get('/subscription-status', authenticate, async (req, res) => {
       return {
         _id: subscriptionDetails._id,
         plan: subscriptionDetails.plan,
-        description: subscriptionDetails.description,
+        description: subscriptionDetails.tagline,
         duration: subscriptionDetails.duration,
         price: subscriptionDetails.price,
         subscribedDate: sub.subscribedDate,
@@ -526,7 +526,7 @@ router.get('/watch-later', authenticate, async (req, res) => {
       return res.status(404).json(commonResponse(false,null,'User not found'));
     }
 
-    const { page = 1, limit = 10 } = req.query; 
+    const { page = 1, limit = 5 } = req.query; 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
