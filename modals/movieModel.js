@@ -1,4 +1,5 @@
 const mongoose = require ('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 const Schema = mongoose.Schema;
 
 const watchHistorySchema = new Schema({
@@ -44,23 +45,11 @@ const movieSchema = new Schema({
     },
     thumbnail:{
         type:String,
-        required:true,
-        validate: {
-            validator: function(v) {
-              return /^https?:\/\/[^\s$.?#].[^\s]*$/.test(v); // Simple URL validation regex
-            },
-            message: props => `${props.value} is not a valid URL!`
-          }
+        required:true
     },
     video:{
         type:String,
-        required:true,
-        validate: {
-            validator: function(v) {
-              return /^https?:\/\/[^\s$.?#].[^\s]*$/.test(v); // Simple URL validation regex
-            },
-            message: props => `${props.value} is not a valid URL!`
-          }
+        required:true
     },
     addedDate:{
         type:Date,
@@ -70,6 +59,8 @@ const movieSchema = new Schema({
     rating:[ratingSchema]
 
 });
+
+movieSchema.plugin(mongoosePaginate);
 
 const Movie = mongoose.model('Movie', movieSchema);
 module.exports = Movie;

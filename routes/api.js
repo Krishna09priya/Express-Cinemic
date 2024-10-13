@@ -67,8 +67,7 @@ router.post('/login', (req, res) => {
          }
   
         // Compare passwords asynchronously
-        return bcrypt.compare(password, user.password)
-          .then(isMatch => {
+        bcrypt.compare(password, user.password).then(isMatch => {
             if (!isMatch) {
               return res.status(400).json(commonResponse(false,null,'Email id or password is incorrect'));
             }

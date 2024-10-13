@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar{
+            background-color: #ffffff;
+        }
+        .navbar-brand{
+            margin-right: 25cm;
+        }
+        .login-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .login-container h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-control {
+            margin-bottom: 5px;
+        }
+        .btn-custom {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .text-center a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-light">
+    <div class="container">
+        <a class="navbar-brand ms-auto" href="#"><img src="/images/logo-transparent.png" alt="logo"></a>
+    </div>
+</nav>    
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="login-container mt-5">
+                <h3>Admin Login</h3>
+                <p class="text-center">Please enter your login credentials</p>
+                <form action="/login" method="post">
+                    <div class="row">
+                        <label for="email" class="col-sm-12 col-form-label">
+                            <i class="fa fa-envelope"></i> Enter email
+                        </label>
+                        <div class="col-sm-12">
+                            <input type="email" class="form-control" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <label for="password" class="col-sm-12 col-form-label">
+                            <i class="fa fa-lock"></i> Enter Password
+                        </label>
+                        <div class="col-sm-12 mb-3">
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-primary btn-custom">Login</button>
+                        </div>
+                        <% if (errors.length > 0) { %>
+                            <div style="color: red;">
+                             <ul>
+                                 <% errors.forEach(function(error) { %>
+                                     <li><%= error.msg %></li>
+                                 <% }); %>
+                             </ul>
+                             </div>
+                            <% } %>
+                    </div>
+                </form>
+                <p class="text-center mt-3"><a href="/forgot-password">Forgot password?</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

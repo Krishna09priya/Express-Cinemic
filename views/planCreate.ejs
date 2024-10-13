@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Subscription Plan</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+     <style>
+        .nav-link {
+            margin-right: 20px; 
+            font-size: 1.1rem; 
+        }
+        .nav-item{
+            font-weight: bold;
+        }
+        .form-container {
+            width:75%;
+            margin-top: 50px;
+        }
+        .form-heading {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            font-size: 1rem;
+        }
+        .form-group .input-group-text {
+            background-color: white;
+            border-right: none;
+        }
+        .form-group .form-control {
+            border-left: none;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #reports{
+            margin-top:2px; 
+            font-weight:bold; 
+            color: #808080; 
+            font-size:1.1rem;
+        }
+        #admin{
+            margin-top: 8px; 
+            font-weight: bold; 
+            font-size:1.1rem;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="#"><img src="/images/logo-transparent.png" alt="Logo"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/movie/movie-listing-page">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/users/user-listing-page">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/users/plan-listing-page">Subscription Plans</a></li>
+                    <li class="nav-item dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" id="reports">Reports</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/movie/revenue">Revenue Report</a>
+                            <a class="dropdown-item" href="/movie/view-count">Movie View Count</a>
+                            <a class="dropdown-item" href="/movie/monthly-subscription">Monthly Subscription Report</a>
+                            <a class="dropdown-item" href="/movie/movie-rating">Movie Rating Report</a>
+                        </div>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" id="admin"><i class="fas fa-user"></i> Admin</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Change Password</a>
+                            <a class="dropdown-item" href="/logout">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="form-container">
+            <div class="form-heading">Create a subscription Plan </div>
+            <form method="post" action="/users/plan-add">
+                <div class="form-group">
+                    <label for="title">Plan</label>
+                    <input type="text" class="form-control" id="title" name="plan">
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration</label>
+                    <input type="text" class="form-control" id="duration"name="duration">
+                </div>
+                <div class="form-group">
+                <label for="price">Price</label>
+                 <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa fa-rupee-sign"></i>
+                            </span>
+                        </div>
+                        <input type="number" class="form-control" id="price" name="price" min=1>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Tagline</label>
+                    <textarea class="form-control" id="description" rows="3"name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="detailedDescription">Detailed Description</label>
+                    <textarea class="form-control" id="detailedDescription" rows="6"name="detailedDescription"></textarea>
+                </div>
+                <% if (error) { %>
+                    <p style="color: red;"><%= error %></p>
+                  <% } %>
+                  <% if (success) { %>
+                    <p style="color: green;"><%= success %></p>
+                  <% } %>
+                <div class="form-actions">
+                    <a href="/users/plan-listing-page" class="btn btn-secondary" id="button">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-3">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
